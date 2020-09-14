@@ -3,6 +3,7 @@ module github.com/GianOrtiz/typesense-go
 go 1.14
 
 require (
+	firebase.google.com/go v3.13.0+incompatible
 	github.com/Nvveen/Gotty v0.0.0-20120604004816-cd527374f1e5 // indirect
 	github.com/cenkalti/backoff v2.2.1+incompatible // indirect
 	github.com/containerd/continuity v0.0.0-20200710164510-efbc4488d8fe // indirect
@@ -15,5 +16,7 @@ require (
 	github.com/sirupsen/logrus v1.6.0 // indirect
 	github.com/stretchr/testify v1.6.1
 	golang.org/x/net v0.0.0-20200904194848-62affa334b73 // indirect
+	golang.org/x/oauth2 v0.0.0-20200902213428-5d25da1a8d43 // indirect
 	golang.org/x/sys v0.0.0-20200909081042-eff7692f9009 // indirect
+	google.golang.org/api v0.31.0 // indirect
 )

@@ -29,6 +29,12 @@ const (
 var (
 	testClient *typesense.Client
 
+	testAPIKey = &typesense.APIKey{
+		Description: "description",
+		Actions:     []typesense.APIAction{typesense.AllAPIAction},
+		Collections: []string{"companies"},
+	}
+
 	testCollection = typesense.CollectionSchema{
 		Name: "test",
 		Fields: []typesense.CollectionField{
@@ -184,4 +190,23 @@ func TestDeleteCollection(t *testing.T) {
 	if err != nil {
 		assert.Equal(t, testCollection.Name, c.Name)
 	}
+}
+
+func TestCreateAPIKey(t *testing.T) {
+	var err error
+	testAPIKey, err = testClient.CreateAPIKey(testAPIKey.Description, testAPIKey.Actions, testAPIKey.Collections)
+	assert.Equal(t, nil, err)
+}
+
+func TestAPIKey(t *testing.T) {
+	apiKey, err := testClient.APIKey(testAPIKey.ID)
+	assert.Equal(t, nil, err)
+	if err != nil {
+		assert.Equal(t, *testAPIKey, *apiKey)
+	}
+}
+
+func TestDeleteAPIKey(t *testing.T) {
+	err := testClient.DeleteAPIKey(testAPIKey.ID)
+	assert.Equal(t, nil, err)
 }
