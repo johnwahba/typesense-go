@@ -25,6 +25,13 @@ var (
 		0,
 		0,
 	}
+	testOverride = Override{
+		ID: "customize-apple",
+		Rule: OverrideRule{
+			Match: "exact",
+			Query: "apple",
+		},
+	}
 )
 
 func TestCollectionField(t *testing.T) {
@@ -205,5 +212,165 @@ func TestDeleteCollection_notFound(t *testing.T) {
 	_, err := client.DeleteCollection(testCollection.Name)
 	if err != ErrCollectionNotFound {
 		t.Errorf("Expected to receive error %v, received %v", ErrCollectionNotFound, err)
+	}
+}
+
+func TestOverrideCollection(t *testing.T) {
+	mockClient.DoFunc = func(req *http.Request) (*http.Response, error) {
+		reqBody, _ := ioutil.ReadAll(req.Body)
+		return &http.Response{
+			StatusCode: http.StatusOK,
+			Body:       ioutil.NopCloser(bytes.NewReader(reqBody)),
+		}, nil
+	}
+	client := Client{
+		httpClient: mockClient,
+		masterNode: testMasterNode,
+	}
+	err := client.OverrideCollection(testCollection.Name, testOverride)
+	if err != nil {
+		t.Errorf("Expected to receive nil error, received %v", err)
+	}
+}
+
+func TestOverrideCollection_collectionNotFound(t *testing.T) {
+	mockClient.DoFunc = func(req *http.Request) (*http.Response, error) {
+		return &http.Response{
+			StatusCode: http.StatusNotFound,
+			Body:       ioutil.NopCloser(bytes.NewReader([]byte{})),
+		}, nil
+	}
+	client := Client{
+		httpClient: mockClient,
+		masterNode: testMasterNode,
+	}
+	err := client.OverrideCollection(testCollection.Name, testOverride)
+	if err != ErrCollectionNotFound {
+		t.Errorf("Expected to receive error %v, received %v", ErrCollectionNotFound, err)
+	}
+}
+
+func TestOverrideCollection_unauthorized(t *testing.T) {
+	mockClient.DoFunc = func(req *http.Request) (*http.Response, error) {
+		return &http.Response{
+			StatusCode: http.StatusUnauthorized,
+			Body:       ioutil.NopCloser(bytes.NewReader([]byte{})),
+		}, nil
+	}
+	client := Client{
+		httpClient: mockClient,
+		masterNode: testMasterNode,
+	}
+	err := client.OverrideCollection(testCollection.Name, testOverride)
+	if err != ErrUnauthorized {
+		t.Errorf("Expected to receive error %v, received %v", ErrUnauthorized, err)
+	}
+}
+
+func TestRetrieveOverrides(t *testing.T) {
+	mockClient.DoFunc = func(req *http.Request) (*http.Response, error) {
+		bodyData := make(map[string][]*Override)
+		bodyData["overrides"] = []*Override{&testOverride}
+		body, _ := json.Marshal(bodyData)
+		return &http.Response{
+			StatusCode: http.StatusOK,
+			Body:       ioutil.NopCloser(bytes.NewReader(body)),
+		}, nil
+	}
+	client := Client{
+		httpClient: mockClient,
+		masterNode: testMasterNode,
+	}
+	overrides, err := client.RetrieveOverrides(testCollection.Name)
+	if err != nil {
+		t.Errorf("Expected to receive nil error, received %v", err)
+	}
+	if len(overrides) == 0 {
+		t.Errorf("Expected to receive at least one override, received 0")
+	}
+}
+
+func TestRetrieveOverrides_collectionNotFound(t *testing.T) {
+	mockClient.DoFunc = func(req *http.Request) (*http.Response, error) {
+		return &http.Response{
+			StatusCode: http.StatusNotFound,
+			Body:       ioutil.NopCloser(bytes.NewReader(nil)),
+		}, nil
+	}
+	client := Client{
+		httpClient: mockClient,
+		masterNode: testMasterNode,
+	}
+	_, err := client.RetrieveOverrides(testCollection.Name)
+	if err != ErrCollectionNotFound {
+		t.Errorf("Expected to receive error %v, received %v", ErrCollectionNotFound, err)
+	}
+}
+
+func TestRetrieveOverrides_unauthorized(t *testing.T) {
+	mockClient.DoFunc = func(req *http.Request) (*http.Response, error) {
+		return &http.Response{
+			StatusCode: http.StatusUnauthorized,
+			Body:       ioutil.NopCloser(bytes.NewReader(nil)),
+		}, nil
+	}
+	client := Client{
+		httpClient: mockClient,
+		masterNode: testMasterNode,
+	}
+	_, err := client.RetrieveOverrides(testCollection.Name)
+	if err != ErrUnauthorized {
+		t.Errorf("Expected to receive error %v, received %v", ErrUnauthorized, err)
+	}
+}
+
+func TestDeleteOverride(t *testing.T) {
+	mockClient.DoFunc = func(req *http.Request) (*http.Response, error) {
+		return &http.Response{
+			StatusCode: http.StatusOK,
+			Body:       ioutil.NopCloser(bytes.NewReader(nil)),
+		}, nil
+	}
+	client := Client{
+		httpClient: mockClient,
+		masterNode: testMasterNode,
+	}
+	err := client.DeleteOverride(testCollection.Name, testOverride.ID)
+	if err != nil {
+		t.Errorf("Expected to receive error nil, received %v", err)
+	}
+}
+
+func TestDeleteOverride_collectionNotFound(t *testing.T) {
+	mockClient.DoFunc = func(req *http.Request) (*http.Response, error) {
+		return &http.Response{
+			StatusCode: http.StatusNotFound,
+			Body:       ioutil.NopCloser(bytes.NewReader(nil)),
+		}, nil
+	}
+	client := Client{
+		httpClient: mockClient,
+		masterNode: testMasterNode,
+	}
+	err := client.DeleteOverride(testCollection.Name, testOverride.ID)
+	if err != ErrCollectionNotFound {
+		t.Errorf("Expected to receive error %v, received %v", ErrCollectionNotFound, err)
+	}
+}
+
+func TestDeleteOverride_unauthorized(t *testing.T) {
+	mockClient.DoFunc = func(req *http.Request) (*http.Response, error) {
+		return &http.Response{
+			StatusCode: http.StatusUnauthorized,
+			Body:       ioutil.NopCloser(bytes.NewReader(nil)),
+		}, nil
+	}
+	client := Client{
+		httpClient: mockClient,
+		masterNode: testMasterNode,
+	}
+	err := client.DeleteOverride(testCollection.Name, testOverride.ID)
+	if err != ErrUnauthorized {
+		t.Errorf("Expected to receive error %v, received %v", ErrUnauthorized, err)
 	}
 }

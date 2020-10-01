@@ -21,4 +21,4 @@ lint: ## Lint your code
 	./bin/golangci-lint run -v
 
 setup: ## Setup binary packages for application
-	wget -O - -q https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh| sh -s v1.30.0
+	curl -s https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh| sh -s v1.30.0
